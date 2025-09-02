@@ -1,8 +1,9 @@
 {
-  "name": "my-trip",
+  "name": "spot-mapper",
   "private": true,
   "version": "1.0.0",
   "description": "A beautiful React app for planning and organizing your trips",
+  "homepage": "https://ShaunSpinelli.github.io/spot-mapper",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +11,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.12",
