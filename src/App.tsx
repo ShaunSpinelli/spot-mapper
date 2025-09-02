@@ -65,6 +65,7 @@ function App() {
   const [locationsShareUrl, setLocationsShareUrl] = useState<string>('')
   const [isMapAddingMode, setIsMapAddingMode] = useState(false)
   const [targetLocation, setTargetLocation] = useState<{ lat: number, lng: number } | null>(null)
+  const [openPopupLocationIndex, setOpenPopupLocationIndex] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
   // Handle window resize for responsive design
@@ -182,10 +183,18 @@ function App() {
     setIsMapAddingMode(false)
   }
 
-  const handleLocationClick = (location: MapLocation) => {
+  const handleLocationClick = (location: MapLocation, index: number) => {
+    console.log('Location clicked:', location, 'index:', index)
     setTargetLocation({ lat: location.lat, lng: location.lng })
+    setOpenPopupLocationIndex(index)
+    console.log('Set targetLocation to:', { lat: location.lat, lng: location.lng })
+    console.log('Set openPopupLocationIndex to:', index)
     // Clear the target after a longer delay to ensure the view stays focused
-    setTimeout(() => setTargetLocation(null), 5000)
+    setTimeout(() => {
+      setTargetLocation(null)
+      setOpenPopupLocationIndex(null)
+      console.log('Cleared targetLocation and openPopupLocationIndex')
+    }, 5000)
   }
 
   const openInGoogleMaps = (location: MapLocation) => {
@@ -613,7 +622,7 @@ function App() {
                 {mapLocations.map((location, index) => (
                   <div 
                     key={index}
-                    onClick={() => handleLocationClick(location)}
+                    onClick={() => handleLocationClick(location, index)}
                     style={{ 
                       backgroundColor: '#f8fafc', 
                       border: '1px solid #e2e8f0', 
@@ -770,6 +779,7 @@ function App() {
           onAddLocation={handleMapAddLocation}
           isAddingMode={isMapAddingMode}
           targetLocation={targetLocation}
+          openPopupLocationId={openPopupLocationIndex}
         />
       </div>
     </div>

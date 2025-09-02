@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
@@ -16,6 +16,7 @@ interface MapLocation {
   lng: number
   name: string
   description?: string
+  id?: string | number
 }
 
 interface MapComponentProps {
@@ -26,6 +27,7 @@ interface MapComponentProps {
   onAddLocation?: (lat: number, lng: number, data: { name: string, description: string }) => void
   isAddingMode?: boolean
   targetLocation?: { lat: number, lng: number } | null
+  openPopupLocationId?: string | number | null
 }
 
 // Component to handle map clicks
@@ -41,73 +43,53 @@ function ClickHandler({ onAddLocation, isAddingMode }: { onAddLocation?: (lat: n
   return null
 }
 
-// Component to handle map centering
+// Simple component to handle targetLocation centering
 function MapCenterController({ targetLocation }: { targetLocation?: { lat: number, lng: number } | null }) {
   const map = useMapEvents({})
   
   React.useEffect(() => {
     if (targetLocation) {
-      map.setView([targetLocation.lat, targetLocation.lng], 15, {
-        animate: true,
-        duration: 1
-      })
+      console.log('MapCenterController: Centering map on:', targetLocation)
+      // Add a small delay to ensure any other map updates have finished
+      setTimeout(() => {
+        map.setView([targetLocation.lat, targetLocation.lng], 15, {
+          animate: true,
+          duration: 1
+        })
+      }, 50)
     }
   }, [targetLocation, map])
   
   return null
 }
 
-// Component to handle automatic view updates when center/zoom props change
-function MapViewController({ center, zoom, targetLocation }: { 
-  center: [number, number], 
-  zoom: number,
-  targetLocation?: { lat: number, lng: number } | null 
+// Component to handle individual location markers with automatic popup opening
+function LocationMarker({ location, shouldOpenPopup }: { 
+  location: MapLocation
+  shouldOpenPopup: boolean 
 }) {
-  const map = useMapEvents({})
-  const [lastAutoUpdate, setLastAutoUpdate] = React.useState({ center, zoom })
-  const [isUserInteracting, setIsUserInteracting] = React.useState(false)
-  const [isInitialLoad, setIsInitialLoad] = React.useState(true)
+  const markerRef = useRef<any>(null)
   
-  React.useEffect(() => {
-    // Track if user is interacting via targetLocation
-    if (targetLocation) {
-      setIsUserInteracting(true)
-      // Reset interaction flag after target location clears
-      const timer = setTimeout(() => setIsUserInteracting(false), 1000)
-      return () => clearTimeout(timer)
+  useEffect(() => {
+    if (shouldOpenPopup && markerRef.current) {
+      markerRef.current.openPopup()
     }
-  }, [targetLocation])
+  }, [shouldOpenPopup])
   
-  // Handle initial load - set view immediately on mount
-  React.useEffect(() => {
-    if (isInitialLoad) {
-      // Small delay to ensure map is fully initialized
-      const timer = setTimeout(() => {
-        map.setView(center, zoom, {
-          animate: false // No animation on initial load
-        })
-        setLastAutoUpdate({ center, zoom })
-        setIsInitialLoad(false)
-      }, 100)
-      return () => clearTimeout(timer)
-    }
-  }, [isInitialLoad, center, zoom, map])
-  
-  React.useEffect(() => {
-    // Only update if center/zoom actually changed (not just from user interaction)
-    const centerChanged = center[0] !== lastAutoUpdate.center[0] || center[1] !== lastAutoUpdate.center[1]
-    const zoomChanged = zoom !== lastAutoUpdate.zoom
-    
-    if (!isInitialLoad && (centerChanged || zoomChanged) && !targetLocation && !isUserInteracting) {
-      map.setView(center, zoom, {
-        animate: true,
-        duration: 1.5
-      })
-      setLastAutoUpdate({ center, zoom })
-    }
-  }, [center, zoom, targetLocation, isUserInteracting, map, lastAutoUpdate, isInitialLoad])
-  
-  return null
+  return (
+    <Marker ref={markerRef} position={[location.lat, location.lng]}>
+      <Popup>
+        <div>
+          <strong>{location.name}</strong>
+          {location.description && (
+            <p style={{ margin: '5px 0 0 0', fontSize: '12px' }}>
+              {location.description}
+            </p>
+          )}
+        </div>
+      </Popup>
+    </Marker>
+  )
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({ 
@@ -117,7 +99,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
   height = '400px',
   onAddLocation,
   isAddingMode = false,
-  targetLocation = null
+  targetLocation = null,
+  openPopupLocationId = null
 }) => {
   const [pendingLocation, setPendingLocation] = useState<{lat: number, lng: number} | null>(null)
 
@@ -139,21 +122,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
         
         <ClickHandler onAddLocation={handleMapClick} isAddingMode={isAddingMode} />
         <MapCenterController targetLocation={targetLocation} />
-        <MapViewController center={center} zoom={zoom} targetLocation={targetLocation} />
         
         {locations.map((location, index) => (
-          <Marker key={index} position={[location.lat, location.lng]}>
-            <Popup>
-              <div>
-                <strong>{location.name}</strong>
-                {location.description && (
-                  <p style={{ margin: '5px 0 0 0', fontSize: '12px' }}>
-                    {location.description}
-                  </p>
-                )}
-              </div>
-            </Popup>
-          </Marker>
+          <LocationMarker 
+            key={location.id || index} 
+            location={location}
+            shouldOpenPopup={openPopupLocationId === location.id || (openPopupLocationId === index && !location.id)}
+          />
         ))}
 
         {/* Show pending location marker */}
