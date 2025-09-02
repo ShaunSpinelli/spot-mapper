@@ -184,16 +184,12 @@ function App() {
   }
 
   const handleLocationClick = (location: MapLocation, index: number) => {
-    console.log('Location clicked:', location, 'index:', index)
     setTargetLocation({ lat: location.lat, lng: location.lng })
     setOpenPopupLocationIndex(index)
-    console.log('Set targetLocation to:', { lat: location.lat, lng: location.lng })
-    console.log('Set openPopupLocationIndex to:', index)
     // Clear the target after a longer delay to ensure the view stays focused
     setTimeout(() => {
       setTargetLocation(null)
       setOpenPopupLocationIndex(null)
-      console.log('Cleared targetLocation and openPopupLocationIndex')
     }, 5000)
   }
 

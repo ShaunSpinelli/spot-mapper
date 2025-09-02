@@ -49,7 +49,6 @@ function MapCenterController({ targetLocation }: { targetLocation?: { lat: numbe
   
   React.useEffect(() => {
     if (targetLocation) {
-      console.log('MapCenterController: Centering map on:', targetLocation)
       // Add a small delay to ensure any other map updates have finished
       setTimeout(() => {
         map.setView([targetLocation.lat, targetLocation.lng], 15, {
@@ -59,6 +58,35 @@ function MapCenterController({ targetLocation }: { targetLocation?: { lat: numbe
       }, 50)
     }
   }, [targetLocation, map])
+  
+  return null
+}
+
+// Component to handle initial map view and prop-based updates
+function MapViewController({ center, zoom }: { center: [number, number], zoom: number }) {
+  const map = useMapEvents({})
+  const [isInitialized, setIsInitialized] = React.useState(false)
+  
+  // Handle initial map view setup
+  React.useEffect(() => {
+    if (!isInitialized) {
+      // Small delay to ensure map is fully rendered
+      setTimeout(() => {
+        map.setView(center, zoom, { animate: false })
+        setIsInitialized(true)
+      }, 100)
+    }
+  }, [center, zoom, map, isInitialized])
+  
+  // Handle updates to center/zoom props after initialization
+  React.useEffect(() => {
+    if (isInitialized) {
+      map.setView(center, zoom, {
+        animate: true,
+        duration: 1.5
+      })
+    }
+  }, [center, zoom, map, isInitialized])
   
   return null
 }
@@ -121,6 +149,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         />
         
         <ClickHandler onAddLocation={handleMapClick} isAddingMode={isAddingMode} />
+        <MapViewController center={center} zoom={zoom} />
         <MapCenterController targetLocation={targetLocation} />
         
         {locations.map((location, index) => (
