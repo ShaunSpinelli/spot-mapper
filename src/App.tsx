@@ -9,6 +9,16 @@ interface MapLocation {
   description?: string
 }
 
+export interface Trip {
+  id: string
+  title: string
+  destination: string
+  startDate: string
+  endDate: string
+  description?: string
+  image?: string
+}
+
 function App() {
   
   // Map locations state
@@ -263,27 +273,32 @@ function App() {
         order: isMobile ? 2 : 1
       }}>
         {/* Header */}
-        <div style={{ 
-          padding: isMobile ? '12px 16px' : '20px',
-          borderBottom: '1px solid #e5e7eb',
-          backgroundColor: '#f8fafc'
-        }}>
-          <h1 style={{ 
-            color: 'black', 
-            fontSize: isMobile ? '18px' : '24px', 
-            marginBottom: isMobile ? '4px' : '8px', 
-            margin: 0 
-          }}>
-            🗺️ My Trip
-          </h1>
-          {!isMobile && (
-            <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>
-              Discover & manage locations
-            </p>
-          )}
-        </div>
+        {!isMobile && (
+     <div style={{ 
+      padding: isMobile ? '12px 16px' : '20px',
+      borderBottom: '1px solid #e5e7eb',
+      backgroundColor: '#f8fafc'
+    }}>
+      <h1 style={{ 
+        color: 'black', 
+        fontSize: isMobile ? '18px' : '24px', 
+        marginBottom: isMobile ? '4px' : '8px', 
+        margin: 0 
+      }}>
+        🗺️ My Trip
+      </h1>
+      {!isMobile && (
+        <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>
+          Discover & manage locations
+        </p>
+      )}
+    </div>
 
+        )}
+   
         {/* Controls */}
+
+        {!isMobile && (
         <div style={{ 
           padding: isMobile ? '8px 16px' : '16px',
           borderBottom: '1px solid #e5e7eb',
@@ -483,6 +498,8 @@ function App() {
             </div>
           )}
         </div>
+        )}
+
 
         {/* Click Mode Indicator */}
         {isMapAddingMode && (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Trip } from '../App'
+import { type Trip } from '../App'
 
 interface AddTripFormProps {
   onSubmit: (trip: Omit<Trip, 'id'>) => void

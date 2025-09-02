@@ -12,7 +12,7 @@ import {
   decodeFromUrlSafeBase64,
   isValidBase64
 } from './base64.js'
-import { type Trip } from '../App.js'
+import { type Trip } from '../App'
 
 // Example 1: Basic encoding and decoding
 export function basicExample() {
